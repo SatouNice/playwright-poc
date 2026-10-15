@@ -1,0 +1,16 @@
+[
+  {
+    "ho_ten": "Nguyen Van A",
+    "ngay_sinh": "1990-05-12",
+    "gioi_tinh": "male",
+    "email": "nguyenvana@example.com",
+    "so_dien_thoai": "0901234567"
+  },
+  {
+    "ho_ten": "Tran Thi B",
+    "ngay_sinh": "1995-11-03",
+    "gioi_tinh": "female",
+    "email": "tranthib@example.com",
+    "so_dien_thoai": "0912345678"
+  }
+]

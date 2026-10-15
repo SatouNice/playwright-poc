@@ -1,0 +1,22 @@
+{
+  "baseUrl": "http://localhost:3000",
+  "loginPage": {
+    "path": "/login.html",
+    "userIdSelector": "#username",
+    "passwordSelector": "#password",
+    "submitSelector": "button[type=submit]",
+    "successUrlContains": "/form.html"
+  },
+  "formPage": {
+    "path": "/form.html",
+    "fields": [
+      { "excelColumn": "ho_ten", "selector": "#fullName", "type": "text" },
+      { "excelColumn": "ngay_sinh", "selector": "#dob", "type": "date" },
+      { "excelColumn": "gioi_tinh", "selector": "#gender", "type": "select" },
+      { "excelColumn": "email", "selector": "#email", "type": "text" },
+      { "excelColumn": "so_dien_thoai", "selector": "#phone", "type": "text" }
+    ],
+    "submitSelector": "#submitBtn",
+    "successUrlContains": "/success.html"
+  }
+}

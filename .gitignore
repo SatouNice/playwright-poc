@@ -1,0 +1,12 @@
+node_modules/
+renderer/dist/
+release/
+pw-browsers/
+*.log
+.agent
+
+# thong tin dang nhap local — khong commit
+.env
+
+# file khoa tam cua Excel khi dang mo file
+~$*

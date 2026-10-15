@@ -1,0 +1,448 @@
+{
+  "baseUrl": "https://sbcs.cathaylife.com.vn",
+  "loginPage": {
+    "path": "/",
+    "radioSelector": "#BCS",
+    "userIdSelector": "input[name=userID]",
+    "passwordSelector": "input[name=passWD]",
+    "submitSelector": "button[type=submit]",
+    "successFrameSelector": "frame[name=leftFrame]",
+    "successSelector": "text=New contract system"
+  },
+  "formPage": {
+    "path": "/servlet/HttpDispatcher/ATF0_0200/prompt?TxRequest=true&syscode=AT&subcode=ATF0&syscode=AT&subcode=ATF0&MPROJECT=0",
+    "fields": [
+      {
+        "excelColumn": "is_company",
+        "label": "Ca nhan/Doanh nghiep",
+        "selector": "input[name=IS_COMPANY][value=\"{value}\"]",
+        "type": "radio",
+        "options": [
+          "A1",
+          "A2"
+        ]
+      },
+      {
+        "excelColumn": "loai_giay_chung_minh_bmbh",
+        "label": "BMBH - Loai giay chung minh",
+        "selector": "#CERTIFICATE_TYPE_3",
+        "type": "select",
+        "options": [
+          "1",
+          "3",
+          "4",
+          "6"
+        ]
+      },
+      {
+        "excelColumn": "so_giay_chung_minh_bmbh",
+        "label": "BMBH - So giay chung minh",
+        "selector": "#CERTIFICATE_NUMBER_3",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 60
+      },
+      {
+        "excelColumn": "ho_ten_bmbh",
+        "label": "BMBH - Ho ten",
+        "selector": "#CUSTOMER_NAME_3",
+        "type": "text",
+        "maxLength": 300
+      },
+      {
+        "excelColumn": "sinh_nhat_bmbh",
+        "label": "BMBH - Ngay sinh",
+        "selector": "#BIRTHDAY_3_VT",
+        "type": "date"
+      },
+      {
+        "excelColumn": "gioi_tinh_bmbh",
+        "label": "BMBH - Gioi tinh",
+        "selector": "select#GENDER_3",
+        "type": "select",
+        "options": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "excelColumn": "nghe_nghiep_bmbh",
+        "label": "BMBH - Nghe nghiep",
+        "selector": "select#JOB_CAT_3",
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "excelColumn": "is_policy",
+        "label": "BMBH la NDBH?",
+        "selector": "input[name=IS_POLICY][value=\"{value}\"]",
+        "type": "radio",
+        "options": [
+          "B1",
+          "B2"
+        ]
+      },
+      {
+        "excelColumn": "loai_giay_chung_minh_ndbh",
+        "label": "NDBH - Loai giay chung minh",
+        "selector": "#CERTIFICATE_TYPE_2",
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "excelColumn": "so_giay_chung_minh_ndbh",
+        "label": "NDBH - So giay chung minh",
+        "selector": "#CERTIFICATE_NUMBER_2",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 60
+      },
+      {
+        "excelColumn": "ho_ten_ndbh",
+        "label": "NDBH - Ho ten",
+        "selector": "#CUSTOMER_NAME_2",
+        "type": "text",
+        "maxLength": 300
+      },
+      {
+        "excelColumn": "sinh_nhat_ndbh",
+        "label": "NDBH - Ngay sinh",
+        "selector": "#BIRTHDAY_2_VT",
+        "type": "date"
+      },
+      {
+        "excelColumn": "gioi_tinh_ndbh",
+        "label": "NDBH - Gioi tinh",
+        "selector": "select#GENDER_2",
+        "type": "select",
+        "options": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "excelColumn": "nghe_nghiep_ndbh",
+        "label": "NDBH - Nghe nghiep",
+        "selector": "select#JOB_CAT_2",
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "excelColumn": "ma_san_pham",
+        "label": "Ma san pham",
+        "selector": "#PROD_ID",
+        "type": "select",
+        "options": [
+          "A17",
+          "A18",
+          "A19",
+          "C15",
+          "C22",
+          "C24",
+          "H01",
+          "H02",
+          "I05",
+          "I06",
+          "I07",
+          "I08",
+          "I09",
+          "I11",
+          "I12",
+          "I13",
+          "I14"
+        ]
+      },
+      {
+        "excelColumn": "ngay_tham_gia_bh",
+        "label": "Ngay tham gia BH",
+        "selector": "#ISSUE_DATE_VT",
+        "type": "date"
+      },
+      {
+        "excelColumn": "agent_emp_no",
+        "label": "Ma dai ly",
+        "selector": "#AGENT_EMP_NO",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 10
+      },
+      {
+        "excelColumn": "face_amt",
+        "label": "SP chinh - So tien bao hiem",
+        "selector": null,
+        "type": "text",
+        "numeric": true,
+        "maxLength": 9
+      },
+      {
+        "excelColumn": "matur_ind",
+        "label": "SP chinh - Loai dao han (chi truyen thong)",
+        "selector": null,
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3"
+        ]
+      },
+      {
+        "excelColumn": "matur_age",
+        "label": "SP chinh - Nam/tuoi dao han",
+        "selector": null,
+        "type": "text",
+        "numeric": true,
+        "maxLength": 5
+      },
+      {
+        "excelColumn": "prem_pay_period",
+        "label": "SP chinh - Thoi han dong phi",
+        "selector": null,
+        "type": "text",
+        "numeric": true,
+        "maxLength": 2
+      },
+      {
+        "excelColumn": "pay_freq_type",
+        "label": "SP chinh - Dinh ky dong phi",
+        "selector": null,
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6"
+        ]
+      },
+      {
+        "excelColumn": "method_prem_pay",
+        "label": "SP chinh - Hinh thuc dong phi",
+        "selector": null,
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "9"
+        ]
+      }
+    ],
+    "dependentsColumn": "nguoi_phu_thuoc",
+    "dependentButtonSelector": "#Insert2",
+    "dependentFields": [
+      {
+        "excelColumn": "loai_nguoi_phu_thuoc",
+        "label": "NPT - Loai nguoi phu thuoc",
+        "selector": ":nth-match(select[name=\"POL\"], {n})",
+        "type": "select",
+        "options": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "excelColumn": "loai_giay_chung_minh_npt",
+        "label": "NPT - Loai giay chung minh",
+        "selector": ":nth-match(select[name=\"CERT\"], {n})",
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      },
+      {
+        "excelColumn": "so_giay_chung_minh_npt",
+        "label": "NPT - So giay chung minh",
+        "selector": "#CRT{i}",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 60
+      },
+      {
+        "excelColumn": "ho_ten_npt",
+        "label": "NPT - Ho ten",
+        "selector": "#CSN{i}",
+        "type": "text",
+        "maxLength": 300
+      },
+      {
+        "excelColumn": "sinh_nhat_npt",
+        "label": "NPT - Ngay sinh",
+        "selector": "#BTV{i}",
+        "type": "date"
+      },
+      {
+        "excelColumn": "gioi_tinh_npt",
+        "label": "NPT - Gioi tinh",
+        "selector": ":nth-match(select[name=\"GEND\"], {n})",
+        "type": "select",
+        "options": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "excelColumn": "nghe_nghiep_npt",
+        "label": "NPT - Nghe nghiep",
+        "selector": ":nth-match(select[name=\"JOBC\"], {n})",
+        "type": "select",
+        "options": [
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "submitSelector": "text=Lập hồ sơ",
+    "successSelector": "input[name=\"FACE_AMT\"]"
+  },
+  "productPage": {
+    "subProductsColumn": "san_pham_phu",
+    "subProductFields": [
+      {
+        "excelColumn": "loai_sp",
+        "label": "SPP - Loai san pham phu",
+        "type": "select",
+        "options": [
+          "SPP",
+          "CMR"
+        ]
+      },
+      {
+        "excelColumn": "ma_sp",
+        "label": "SPP - Ma san pham phu",
+        "type": "text",
+        "maxLength": 5
+      },
+      {
+        "excelColumn": "so_giay_chung_minh",
+        "label": "SPP - So giay chung minh nguoi mua",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 60
+      },
+      {
+        "excelColumn": "so_tien_bao_hiem",
+        "label": "SPP - So tien bao hiem (chi loai SPP)",
+        "type": "text",
+        "numeric": true,
+        "maxLength": 15
+      },
+      {
+        "excelColumn": "rider_amt",
+        "label": "SPP - Hang muc CMR (chi loai CMR)",
+        "type": "select",
+        "options": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "main": {
+      "pathContains": "ATF0_0300",
+      "fields": [
+        {
+          "excelColumn": "face_amt",
+          "selector": "input[name=\"FACE_AMT\"]",
+          "type": "text"
+        },
+        {
+          "excelColumn": "matur_ind",
+          "selector": "select[name=\"MATUR_IND\"]",
+          "type": "select",
+          "skipIfLocked": true
+        },
+        {
+          "excelColumn": "matur_age",
+          "selector": "select#MATUR_AGE",
+          "type": "select",
+          "skipIfLocked": true
+        },
+        {
+          "excelColumn": "prem_pay_period",
+          "selector": "select#PREM_PAY_PERIOD",
+          "type": "select",
+          "skipIfLocked": true
+        },
+        {
+          "excelColumn": "pay_freq_type",
+          "selector": "select#PAY_FREQ_TYPE",
+          "type": "select",
+          "skipIfLocked": true
+        },
+        {
+          "excelColumn": "method_prem_pay",
+          "selector": "select[name=\"METHOD_PREM_PAY\"]",
+          "type": "select",
+          "skipIfLocked": true
+        }
+      ],
+      "submitSelector": "#Insert",
+      "addSppSelector": "button[onclick=\"toAdd()\"]",
+      "addCmrSelector": "button[onclick=\"toAddMedical()\"]",
+      "markerSelector": "input[name=\"FACE_AMT\"]"
+    },
+    "spp": {
+      "pathContains": "ATF0_0311",
+      "rowSelector": "tr[data-rider-row-key]",
+      "checkboxSelector": "input[name=\"RIDER_KIND\"]",
+      "amountSelector": "input[type=\"text\"]:not([readonly])",
+      "submitSelector": "button[name=\"toSubmitButton\"]",
+      "closeSelector": "button[name=\"toCloseButton\"]",
+      "amountSelectSelector": "select"
+    },
+    "cmr": {
+      "__GHI_CHU__": "Cau truc lay tu lan chay that 14/10/2026 (man ATF0_0300/toDisplay310, ma trang ATF00313). KHAC han man SPP: khong co data-rider-row-key, nut dong ten la \"Roi khoi\" chu khong phai \"Roi bo\". Viec DIEN va LUU van chua chay thu lan nao.",
+      "markerSelector": "select[name=\"RIDER_AMT\"]",
+      "rowAnchorSelector": "input[name=\"RIDER_PREM_PAY_PERIOD\"][id$=\"{cert}{maSp}\"]",
+      "checkboxSelector": "input[name=\"RIDER_KIND\"]",
+      "tierSelectSelector": "select[name=\"RIDER_AMT\"]",
+      "submitSelector": "text=\"Xác định\"",
+      "closeSelector": "text=\"Rời khỏi\"",
+      "hangMuc": {
+        "0": "Vui lòng chọn",
+        "1": "Bạc",
+        "2": "Vàng",
+        "3": "Bạch Kim"
+      }
+    }
+  },
+  "run": {
+    "headless": false,
+    "slowMo": 150,
+    "timeoutMs": 15000,
+    "maxRetryPerRow": 1,
+    "recordVideo": true,
+    "videoSize": {
+      "width": 1280,
+      "height": 720
+    },
+    "debugSkipFinalSubmit": false,
+    "debugKeepBrowserOpen": false
+  },
+  "labelColumn": "ho_ten_bmbh"
+}

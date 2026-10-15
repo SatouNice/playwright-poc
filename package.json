@@ -1,0 +1,63 @@
+{
+  "name": "insurance-illustration-app",
+  "version": "1.1.0",
+  "description": "App Electron: doc Excel va tu dong nhap bang minh hoa bao hiem bang Playwright",
+  "type": "commonjs",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "node scripts/dev.js",
+    "build:renderer": "vite build",
+    "start": "npm run build:renderer && node scripts/start-electron.js",
+    "server": "node test-server/server.js",
+    "automate": "node automation/index.js",
+    "explore": "node scripts/explore.js",
+    "download-browser": "node scripts/download-browser.js",
+    "dist": "npm run build:renderer && npm run download-browser && electron-builder --win",
+    "test-case": "node scripts/test-one-case.js",
+    "excel-template": "node scripts/make-excel-template.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "express": "^4.19.2",
+    "playwright": "^1.47.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^26.15.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^6.0.7"
+  },
+  "build": {
+    "appId": "com.insurance.illustration-app",
+    "productName": "Insurance Illustration App",
+    "asar": true,
+    "files": [
+      "electron/**/*",
+      "renderer/dist/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "pw-browsers",
+        "to": "pw-browsers"
+      }
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "overrides": {
+    "unzipper": "^0.12.5"
+  }
+}
