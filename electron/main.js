@@ -134,6 +134,31 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'dist', 'index.html'));
   }
 
+  // Chan DIEU HUONG cua chinh cua so dang chay.
+  //
+  // setWindowOpenHandler ben duoi chi chan viec MO CUA SO MOI; no khong chan
+  // duoc truong hop chinh cua so nay bi dieu huong di noi khac (vd keo tha mot
+  // file .html vao cua so, hoac mot the <a> khong co target). Khi do giao dien
+  // app bi thay bang trang la nhung van chay voi dung preload va dung quyen.
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const duocPhep = DEV_SERVER_URL
+      ? url.startsWith(DEV_SERVER_URL) // che do phat trien: Vite tu tai lai trang
+      : url.startsWith('file://');     // ban dong goi: chi giao dien cuc bo
+
+    if (duocPhep) return;
+
+    event.preventDefault();
+    console.warn(`[bao mat] chan dieu huong cua so chinh toi: ${String(url).slice(0, 120)}`);
+
+    // Neu la link https that thi mo bang trinh duyet he thong, giong nhu khi
+    // nguoi dung bam link mo cua so moi.
+    try {
+      if (new URL(url).protocol === 'https:') shell.openExternal(url);
+    } catch {
+      // url khong hop le — da chan roi, khong lam gi them
+    }
+  });
+
   // Chan mo cua so ngoai / dieu huong ra ngoai app.
   // CHI cho giao thuc https di ra trinh duyet he thong: shell.openExternal()
   // giao URL thang cho he dieu hanh, nen neu khong loc thi cac giao thuc khac

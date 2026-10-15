@@ -16,6 +16,7 @@
 //     sheetName: 'Sheet1'
 //   }
 
+const fs = require('fs');
 const ExcelJS = require('exceljs');
 
 /** Chuan hoa ten cot header: bo khoang trang thua, ve chu thuong */
@@ -189,6 +190,33 @@ async function readExcel(filePath, config) {
   const rows = [];
   const allColumns = () => [...fields.map((f) => f.excelColumn), dependentsColumn, subProductsColumn];
 
+  // GIOI HAN TRUOC KHI DOC — xem ghi chu ve zip bomb o dau ham loiQuaLon().
+  const gioiHan = {
+    maxFileSizeMB: config.excel?.maxFileSizeMB ?? 15,
+    maxRows: config.excel?.maxRows ?? 5000,
+    maxColumns: config.excel?.maxColumns ?? 200,
+  };
+
+  const loiQuaLon = (message) => ({
+    valid: false,
+    rows: [],
+    columns: allColumns(),
+    sheetName: null,
+    errors: [{ row: null, column: null, message }],
+  });
+
+  try {
+    const sizeMB = fs.statSync(filePath).size / (1024 * 1024);
+    if (sizeMB > gioiHan.maxFileSizeMB) {
+      return loiQuaLon(
+        `File nang ${sizeMB.toFixed(1)} MB, vuot gioi han ${gioiHan.maxFileSizeMB} MB. ` +
+        `Hay tach thanh nhieu file nho hon.`
+      );
+    }
+  } catch (err) {
+    return loiQuaLon(`Khong doc duoc file: ${err.message}`);
+  }
+
   const workbook = new ExcelJS.Workbook();
   try {
     await workbook.xlsx.readFile(filePath);
@@ -203,6 +231,30 @@ async function readExcel(filePath, config) {
   }
 
   const sheet = workbook.worksheets[0];
+
+  // Chan sheet co kich thuoc bat thuong. Mot file XLSX nen rat nho van co the
+  // khai bao hang trieu dong/cot (nen goi la "zip bomb"), du de treo app khi
+  // duyet qua tung o. Gioi han dung luong file o tren KHONG du de chan viec do.
+  //
+  // LUU Y GIOI HAN CUA CACH NAY: ExcelJS nap ca file vao bo nho roi moi tra ve,
+  // nen hai kiem tra nay chi chan duoc viec XU LY mot sheet qua lon, chua chan
+  // duoc viec NAP no. Muon chan triet de thi phai doc kieu luong hoac tach
+  // parser sang mot tien trinh rieng co gioi han bo nho.
+  if (sheet) {
+    if (sheet.rowCount > gioiHan.maxRows) {
+      return loiQuaLon(
+        `File co ${sheet.rowCount} dong, vuot gioi han ${gioiHan.maxRows} dong. ` +
+        `Hay tach thanh nhieu file nho hon.`
+      );
+    }
+    if (sheet.columnCount > gioiHan.maxColumns) {
+      return loiQuaLon(
+        `File co ${sheet.columnCount} cot, vuot gioi han ${gioiHan.maxColumns} cot. ` +
+        `Kiem tra lai file co dung dinh dang khong.`
+      );
+    }
+  }
+
   if (!sheet) {
     return {
       valid: false,

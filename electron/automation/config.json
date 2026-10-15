@@ -445,5 +445,10 @@
     "debugKeepBrowserOpen": false,
     "keepMediaDays": 7
   },
-  "labelColumn": "ho_ten_bmbh"
+  "labelColumn": "ho_ten_bmbh",
+  "excel": {
+    "maxFileSizeMB": 15,
+    "maxRows": 5000,
+    "maxColumns": 200
+  }
 }

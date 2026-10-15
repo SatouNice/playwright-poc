@@ -42,31 +42,45 @@ npm run start
 ## File Excel mẫu
 
 ```bash
-npm run sample-excel
+npm run excel-template
 ```
 
 Tạo ra trong thư mục `sample-data/`:
 
 | File | Dùng để |
 |---|---|
-| `danh-sach-hop-le.xlsx` | 3 dòng đúng format — chạy thật được |
-| `danh-sach-loi.xlsx` | đủ cột nhưng sai dữ liệu (dòng trống ở giữa, ngày `32/13/1999`, email sai, thiếu họ tên) — để thử phần validate |
-| `danh-sach-thieu-cot.xlsx` | thiếu hẳn cột `so_dien_thoai` — để thử lỗi thiếu cột bắt buộc |
+| `mau-chuan.xlsx` | 1 hồ sơ, 2 người phụ thuộc, 2 mục sản phẩm phụ |
+| `mau-r15.xlsx` | 1 hồ sơ, chỉ 1 sản phẩm phụ dạng dropdown phần trăm |
+| `mau-co-cmr.xlsx` | thêm 1 mục CMR để thử màn sản phẩm bổ trợ y tế |
+| `mau-npt.xlsx` | gán sản phẩm phụ cho người phụ thuộc |
+| `mau-3-dong.xlsx` | 3 hồ sơ, mỗi hồ sơ đi một nhánh khác nhau — dùng để thử vòng lặp |
+
+Tiêu đề cột được sinh thẳng từ `electron/automation/config.json` nên file mẫu
+luôn khớp cấu hình hiện hành.
 
 ### Format Excel chuẩn
 
-Sheet đầu tiên, dòng 1 là tiêu đề, tên cột không dấu:
+Sheet đầu tiên, dòng 1 là tiêu đề, tên cột không dấu. Có 25 cột; xem danh sách
+đầy đủ và ý nghĩa từng giá trị trong `.agent/protocol_page_one/README.md`.
 
-| ho_ten | ngay_sinh | gioi_tinh | email | so_dien_thoai |
-|---|---|---|---|---|
-| Nguyen Van A | 1990-05-12 | male | a@example.com | 0901234567 |
+Vài cột đáng lưu ý:
 
-- `ngay_sinh`: chấp nhận `YYYY-MM-DD`, `DD/MM/YYYY` hoặc ô đã định dạng ngày của Excel
-- `gioi_tinh`: chỉ `male` hoặc `female`
-- `so_dien_thoai`: nên định dạng cột thành **Text** để không mất số 0 ở đầu (app sẽ báo lỗi nếu ô là kiểu số)
+- `sinh_nhat_bmbh`, `sinh_nhat_ndbh`, `ngay_tham_gia_bh`: `DD/MM/YYYY`
+- `so_giay_chung_minh_*` và `agent_emp_no`: nên định dạng cột thành **Text** để
+  không mất số 0 ở đầu
+- `nguoi_phu_thuoc` và `san_pham_phu`: mỗi ô chứa một chuỗi JSON dạng mảng
+- Trong `san_pham_phu`, cột `so_tien_bao_hiem` mang hai nghĩa tuỳ mã sản phẩm:
+  số tiền theo đơn vị hiển thị trên màn hình, hoặc số phần trăm với các mã dùng
+  dropdown (ghi `150`, không ghi `150%`)
 
-Danh sách cột bắt buộc lấy từ `electron/automation/config.json` → `formPage.fields[].excelColumn`,
-nên khi đổi chương trình đích chỉ cần sửa file config.
+Danh sách cột bắt buộc lấy từ `electron/automation/config.json` →
+`formPage.fields[].excelColumn`, nên khi đổi chương trình đích chỉ cần sửa file config.
+
+### Giới hạn khi đọc file
+
+Để tránh file bất thường làm treo app, `config.json` → `excel` giới hạn:
+dung lượng tối đa 15 MB, 5000 dòng, 200 cột. File vượt giới hạn bị từ chối kèm
+thông báo rõ ràng thay vì làm app đứng.
 
 ## Luồng 3 màn hình
 
@@ -93,12 +107,13 @@ nên khi đổi chương trình đích chỉ cần sửa file config.
 - Lỗi do timeout/mạng sẽ được **thử lại 1 lần** trước khi đánh dấu là lỗi.
 - Mỗi dòng lỗi được **chụp màn hình** lưu vào `userData/screenshots/`, đường dẫn ảnh nằm trong
   báo cáo Excel và bấm được ngay trên màn hình Run.
-- Mỗi dòng dữ liệu được **quay video riêng** (`.webm`) lưu vào `userData/videos/` — mỗi dòng mở
-  1 tab riêng trong cùng phiên đăng nhập nên không phải đăng nhập lại, nhưng vẫn tách được video
-  theo từng khách hàng. Video của tất cả các dòng (cả thành công lẫn lỗi) đều xem được ở bảng
-  "Chi tiết từng dòng" trên màn hình Run và nằm trong báo cáo Excel. Tắt bằng cách đặt
-  `run.recordVideo: false` trong `config.json` nếu không cần (Excel nhiều dòng sẽ quay ra nhiều
-  file, tốn dung lượng đĩa).
+- Mỗi dòng dữ liệu **có thể** được quay video riêng (`.webm`) lưu vào `userData/videos/`.
+  Mặc định **tắt** (`run.recordVideo: false`) vì video quay lại màn hình đang hiển thị dữ liệu
+  khách hàng. Chỉ bật khi cần chẩn đoán lỗi.
+- Ảnh chụp lỗi và video **tự xoá sau `run.keepMediaDays` ngày** (mặc định 7), dọn lúc khởi động
+  app. Đặt `0` nếu muốn giữ vô thời hạn.
+- Thông báo lỗi hiện trên màn hình chỉ gồm **một câu** nêu lý do. Phần kỹ thuật (cấu trúc trang,
+  lỗi JavaScript của trang đích) được ghi vào file `.chan-doan.txt` nằm cạnh ảnh chụp.
 
 Thư mục `userData` trên Windows: `%APPDATA%\insurance-illustration-app\`.
 
@@ -110,17 +125,22 @@ Thư mục `userData` trên Windows: `%APPDATA%\insurance-illustration-app\`.
 │   ├── preload.js              # contextBridge — API duy nhất renderer được dùng
 │   └── automation/
 │       ├── config.json         # URL + selector + rule validate của từng field
-│       ├── login.js            # đăng nhập (kế thừa từ POC)
-│       ├── fillForm.js         # điền 1 dòng vào form (kế thừa từ POC)
+│       ├── login.js            # đăng nhập
+│       ├── fillForm.js         # điền màn khách hàng + người phụ thuộc
+│       ├── fillProduct.js      # điền màn sản phẩm chính, sản phẩm phụ và CMR
+│       ├── caseGrouper.js      # gom dòng Excel thành hồ sơ + validate nghiệp vụ
 │       ├── excelReader.js      # đọc & validate Excel bằng exceljs
-│       ├── runner.js           # vòng lặp qua từng dòng, retry, screenshot, phát event
+│       ├── frameDiag.js        # kê cấu trúc trang khi lỗi + rút gọn thông báo
+│       ├── runner.js           # vòng lặp qua từng hồ sơ, retry, screenshot, phát event
 │       └── report.js           # xuất báo cáo kết quả ra .xlsx
 ├── renderer/                   # React app (Vite)
 │   ├── index.html
 │   └── src/{App.jsx, screens/, components/}
 ├── scripts/
 │   ├── dev.js                  # chạy test-server + vite + electron bằng 1 lệnh
-│   └── make-sample-excel.js
+│   ├── explore.js              # khảo sát DOM của chương trình đích
+│   ├── test-one-case.js        # chạy thử không cần mở Electron
+│   └── make-excel-template.js  # sinh file Excel mẫu từ config
 ├── test-server/                # chương trình giả lập để test (từ POC)
 └── automation/                 # bản POC chạy bằng CLI (giữ lại tham khảo)
 ```
