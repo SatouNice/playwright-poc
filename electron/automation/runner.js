@@ -270,8 +270,7 @@ async function runAutomation({
           'Luot chay se dung o day (chi xu ly 1 case).',
           'warn'
         );
-        let message = lastError ? lastError.message : 'Loi khong xac dinh';
-        if (jsErrors.length > 0) message += ` | Loi JS tren trang dich: ${jsErrors.join(' || ')}`;
+        const message = lastError ? lastError.message : 'Loi khong xac dinh';
         results.push({ index: i + 1, excelRow, label, data: caseItem, status: 'error', error: message, screenshot: null, video: null });
         emit({ type: 'result', index: i + 1, total, label, status: 'error', error: message, screenshot: null, video: null });
         keepBrowserOpen = true;
@@ -288,6 +287,32 @@ async function runAutomation({
           await casePage.screenshot({ path: screenshot, fullPage: true });
         } catch {
           screenshot = null;
+        }
+
+        // Ban ke cau truc trang (err.diagnostics) chi danh cho nguoi ky thuat:
+        // ghi ra file canh anh chup, KHONG dua vao thong bao hien tren man hinh.
+        if (lastError && (lastError.diagnostics || jsErrors.length > 0)) {
+          try {
+            const diagPath = path.join(
+              screenshotDir,
+              `loi-ho-so-${excelRow}-${safeFileName(label)}.chan-doan.txt`
+            );
+            const phan = [
+              `Ho so: ${label}`,
+              `Dong Excel: ${excelRow}`,
+              `Thoi diem: ${new Date().toLocaleString('vi-VN')}`,
+              `Loi: ${lastError.message}`,
+            ];
+            if (jsErrors.length > 0) {
+              phan.push('', '--- loi JavaScript cua trang dich ---', jsErrors.join('\n'));
+            }
+            if (lastError.diagnostics) {
+              phan.push('', '--- cau truc trang luc loi ---', lastError.diagnostics);
+            }
+            fs.writeFileSync(diagPath, phan.join('\n') + '\n', 'utf8');
+          } catch {
+            // khong ghi duoc file chan doan thi bo qua, khong lam hong luot chay
+          }
         }
       }
 
@@ -315,10 +340,10 @@ async function runAutomation({
         });
         emit({ type: 'result', index: i + 1, total, label, status: 'ok', error: null, video });
       } else {
-        let message = lastError ? lastError.message : 'Loi khong xac dinh';
-        if (jsErrors.length > 0) {
-          message += ` | Loi JS tren trang dich: ${jsErrors.join(' || ')}`;
-        }
+        // Loi JS cua trang dich KHONG dua vao thong bao cho nguoi dung: no la
+        // loi ben trong trang (vd "Cannot read properties of undefined"), nguoi
+        // nhap lieu khong lam gi duoc voi no. Da ghi trong file .chan-doan.txt.
+        const message = lastError ? lastError.message : 'Loi khong xac dinh';
         results.push({
           index: i + 1,
           excelRow,

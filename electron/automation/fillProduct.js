@@ -18,7 +18,7 @@
 //     loai giay|so giay chung minh|vai tro|ma san pham, nen khong con phai dung meo
 //     "tim o so tien theo id roi doi nguoc len ancestor::tr" nhu truoc.
 
-const { dumpFrames } = require('./frameDiag');
+const { dumpFrames, rutGonThongBaoLoi } = require('./frameDiag');
 
 // Mot so alert() thuc ra la thong bao THANH CONG (vd "Return Code:0 ... thanh cong"),
 // khong phai loi validate — nhan dien qua noi dung de khong bao loi nham.
@@ -97,7 +97,7 @@ async function clickAndWait(page, selector, expectSelector, dialogMessages, log)
   await dismissCustomConfirmDialog(page, log);
 
   if (dialogMessages.length > before) {
-    throw new Error(`Trang bao loi khi bam "${selector}": ${dialogMessages.slice(before).join(' | ')}`);
+    throw new Error(`Trang bao loi khi bam "${selector}": ${dialogMessages.slice(before).map(rutGonThongBaoLoi).join(' | ')}`);
   }
 
   const arrived = await page
@@ -136,7 +136,7 @@ async function clickFinalSubmit(page, selector, dialogMessages, log) {
   await page.waitForTimeout(1000);
 
   if (dialogMessages.length > before) {
-    throw new Error(`Trang bao loi khi bam "Xac dinh (Confirm)": ${dialogMessages.slice(before).join(' | ')}`);
+    throw new Error(`Trang bao loi khi bam "Xac dinh (Confirm)": ${dialogMessages.slice(before).map(rutGonThongBaoLoi).join(' | ')}`);
   }
 
   log('Da bam "Xac dinh (Confirm)" cuoi cung — coi nhu hoan tat ho so.');
@@ -257,7 +257,7 @@ async function fillSppScreen(page, sppConfig, markerSelector, items, dialogMessa
     await dismissCustomConfirmDialog(page, log);
 
     if (dialogMessages.length > before) {
-      throw new Error(`Trang bao loi khi luu san pham bo tro: ${dialogMessages.slice(before).join(' | ')}`);
+      throw new Error(`Trang bao loi khi luu san pham bo tro: ${dialogMessages.slice(before).map(rutGonThongBaoLoi).join(' | ')}`);
     }
 
     const daVeManChinh = await page
@@ -344,7 +344,7 @@ async function fillCmrGroup(page, cmrConfig, markerSelector, maSp, items, dialog
     await dismissCustomConfirmDialog(page, log);
 
     if (dialogMessages.length > before) {
-      throw new Error(`Trang bao loi khi luu san pham CMR: ${dialogMessages.slice(before).join(' | ')}`);
+      throw new Error(`Trang bao loi khi luu san pham CMR: ${dialogMessages.slice(before).map(rutGonThongBaoLoi).join(' | ')}`);
     }
 
     const daVeManChinh = await page
@@ -483,7 +483,10 @@ async function fillProduct(page, config, caseData, log = () => {}, options = {})
     } catch (diagErr) {
       frameDiag = `\n(Khong lay duoc thong tin frame: ${diagErr.message})`;
     }
-    err.message = `${err.message}${frameDiag}`;
+    // KHONG nhet ban ke cau truc trang vao err.message nua: trong bang log cua
+    // app no bien 1 dong loi thanh mot buc tuong chu, nguoi nhap lieu khong doc
+    // noi cau loi that. Dinh kem rieng de runner ghi ra file cho nguoi ky thuat.
+    err.diagnostics = frameDiag;
     throw err;
   }
 }

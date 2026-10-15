@@ -184,7 +184,9 @@ async function fillForm(page, config, baseUrl, caseData, log = () => {}) {
     } catch (diagErr) {
       frameDiag = `\n(Khong lay duoc thong tin frame: ${diagErr.message})`;
     }
-    err.message = `${err.message}${frameDiag}`;
+    // Xem ghi chu trong fillProduct.js: ban ke cau truc trang di rieng, khong
+    // nhet vao thong bao loi hien cho nguoi dung.
+    err.diagnostics = frameDiag;
     throw err;
   }
 }

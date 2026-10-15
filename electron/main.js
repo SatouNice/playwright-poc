@@ -53,6 +53,53 @@ function videoDir() {
   return path.join(app.getPath('userData'), 'videos');
 }
 
+/**
+ * Xoa video / anh chup cu hon `run.keepMediaDays` ngay.
+ *
+ * LY DO: moi dong Excel sinh 1 video quay lai man hinh dang hien ten, ngay sinh
+ * va so giay chung minh cua khach hang; anh chup loi cung vay. Truoc day khong
+ * co co che don nao nen nhung file nay tich tu vo han tren may nhan vien.
+ * Chay luc khoi dong app, truoc khi co lan chay moi nao.
+ */
+function cleanupOldMedia() {
+  let keepDays = 7;
+  try {
+    const cfg = loadConfig();
+    if (Number.isFinite(cfg.run?.keepMediaDays)) keepDays = cfg.run.keepMediaDays;
+  } catch {
+    // config loi thi dung mac dinh, khong de viec don dep lam hong khoi dong app
+  }
+
+  if (keepDays <= 0) return; // 0 hoac am = giu lai vo thoi han (tu nguoi dung chon)
+
+  const hanChot = Date.now() - keepDays * 24 * 60 * 60 * 1000;
+  let daXoa = 0;
+
+  for (const dir of [screenshotDir(), videoDir()]) {
+    let names;
+    try {
+      names = fs.readdirSync(dir);
+    } catch {
+      continue; // thu muc chua ton tai — binh thuong khi chay lan dau
+    }
+    for (const name of names) {
+      const file = path.join(dir, name);
+      try {
+        if (fs.statSync(file).mtimeMs < hanChot) {
+          fs.rmSync(file, { force: true, recursive: true });
+          daXoa += 1;
+        }
+      } catch {
+        // file dang bi mo hoac khong xoa duoc thi bo qua, lan sau don tiep
+      }
+    }
+  }
+
+  if (daXoa > 0) {
+    console.log(`[don dep] da xoa ${daXoa} file video/anh cu hon ${keepDays} ngay.`);
+  }
+}
+
 function sendToRenderer(channel, payload) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send(channel, payload);
@@ -72,7 +119,10 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      // Bat sandbox 15/10/2026: preload.js chi dung contextBridge/ipcRenderer/
+      // webUtils cua chinh Electron, khong require Node module nao (fs, path...)
+      // nen chay duoc trong sandbox. Truoc day de false khong co ly do ro rang.
+      sandbox: true,
     },
   });
 
@@ -84,9 +134,23 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'dist', 'index.html'));
   }
 
-  // Chan mo cua so ngoai / dieu huong ra ngoai app
+  // Chan mo cua so ngoai / dieu huong ra ngoai app.
+  // CHI cho giao thuc https di ra trinh duyet he thong: shell.openExternal()
+  // giao URL thang cho he dieu hanh, nen neu khong loc thi cac giao thuc khac
+  // (file:, javascript:, cac scheme do phan mem khac dang ky...) cung chay duoc.
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    let giaoThuc = null;
+    try {
+      giaoThuc = new URL(url).protocol;
+    } catch {
+      giaoThuc = null; // url khong hop le
+    }
+
+    if (giaoThuc === 'https:') {
+      shell.openExternal(url);
+    } else {
+      console.warn(`[bao mat] tu choi mo URL ngoai https: ${String(url).slice(0, 120)}`);
+    }
     return { action: 'deny' };
   });
 }
@@ -94,6 +158,7 @@ function createWindow() {
 app.whenReady().then(() => {
   // An thanh menu mac dinh (File/Edit/View/Window/Help) — app khong dung toi.
   Menu.setApplicationMenu(null);
+  cleanupOldMedia();
   createWindow();
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -105,10 +170,38 @@ app.on('window-all-closed', () => {
 });
 
 // ---------------------------------------------------------------------------
-// IPC: cau hinh
+// IPC
 // ---------------------------------------------------------------------------
 
-ipcMain.handle('config:get', () => {
+/**
+ * Yeu cau IPC nay co that su den tu cua so cua app khong?
+ *
+ * Cac handler ben duoi lam nhung viec dac quyen (doc file, chay trinh duyet,
+ * ghi bao cao, mo thu muc), nen phai chac chan lenh den tu frame chinh cua cua
+ * so chinh — khong phai tu mot iframe long ben trong hay mot webContents khac.
+ */
+function laYeuCauTuApp(event) {
+  if (!mainWindow || mainWindow.isDestroyed()) return false;
+  if (event.sender !== mainWindow.webContents) return false;
+  try {
+    return event.senderFrame === event.sender.mainFrame;
+  } catch {
+    return false; // frame da bi huy trong luc kiem tra
+  }
+}
+
+/** Nhu ipcMain.handle nhung tu choi moi yeu cau khong den tu cua so cua app. */
+function handleFromApp(channel, listener) {
+  ipcMain.handle(channel, (event, ...args) => {
+    if (!laYeuCauTuApp(event)) {
+      console.warn(`[bao mat] tu choi IPC "${channel}" vi khong den tu cua so cua app.`);
+      throw new Error('Yeu cau khong hop le.');
+    }
+    return listener(event, ...args);
+  });
+}
+
+handleFromApp('config:get', () => {
   const config = loadConfig();
   const columns = config.formPage.fields.map((f) => ({
     excelColumn: f.excelColumn,
@@ -146,7 +239,7 @@ ipcMain.handle('config:get', () => {
 // IPC: dang nhap (chi luu credentials trong RAM cua main process)
 // ---------------------------------------------------------------------------
 
-ipcMain.handle('auth:set-credentials', (_e, payload) => {
+handleFromApp('auth:set-credentials', (_e, payload) => {
   const userId = String(payload?.userId ?? '').trim();
   const password = String(payload?.password ?? '');
   const remember = !!payload?.remember;
@@ -169,14 +262,14 @@ ipcMain.handle('auth:set-credentials', (_e, payload) => {
   return { ok: true, userId };
 });
 
-ipcMain.handle('auth:status', () => ({
+handleFromApp('auth:status', () => ({
   hasCredentials: !!state.credentials,
   userId: state.credentials ? state.credentials.userId : null,
   remember: state.remember,
   hasSavedSession: fs.existsSync(storageStatePath()),
 }));
 
-ipcMain.handle('auth:logout', () => {
+handleFromApp('auth:logout', () => {
   state.credentials = null;
   state.remember = false;
   try {
@@ -225,7 +318,7 @@ async function validateExcelFile(filePath) {
   };
 }
 
-ipcMain.handle('excel:pick', async () => {
+handleFromApp('excel:pick', async () => {
   const res = await dialog.showOpenDialog(mainWindow, {
     title: 'Chon file Excel danh sach khach hang',
     properties: ['openFile'],
@@ -235,7 +328,7 @@ ipcMain.handle('excel:pick', async () => {
   return validateExcelFile(res.filePaths[0]);
 });
 
-ipcMain.handle('excel:validate', async (_e, filePath) => {
+handleFromApp('excel:validate', async (_e, filePath) => {
   if (!filePath || !filePath.toLowerCase().endsWith('.xlsx')) {
     return {
       valid: false,
@@ -265,7 +358,7 @@ ipcMain.handle('excel:validate', async (_e, filePath) => {
 // IPC: chay automation
 // ---------------------------------------------------------------------------
 
-ipcMain.handle('run:start', async () => {
+handleFromApp('run:start', async () => {
   if (state.running) return { ok: false, message: 'Dang co mot luot chay khac.' };
   if (!state.credentials) return { ok: false, message: 'Chua dang nhap.' };
   if (!state.excel || state.excel.cases.length === 0) {
@@ -309,13 +402,13 @@ ipcMain.handle('run:start', async () => {
   return { ok: true, total: cases.length };
 });
 
-ipcMain.handle('run:stop', () => {
+handleFromApp('run:stop', () => {
   if (!state.running) return { ok: false, message: 'Khong co luot chay nao dang chay.' };
   state.stopRequested = true;
   return { ok: true };
 });
 
-ipcMain.handle('run:status', () => ({
+handleFromApp('run:status', () => ({
   running: state.running,
   stopRequested: state.stopRequested,
 }));
@@ -324,7 +417,7 @@ ipcMain.handle('run:status', () => ({
 // IPC: xuat bao cao
 // ---------------------------------------------------------------------------
 
-ipcMain.handle('report:export', async () => {
+handleFromApp('report:export', async () => {
   if (!state.lastRun || state.lastRun.results.length === 0) {
     return { ok: false, message: 'Chua co ket qua nao de xuat bao cao.' };
   }
@@ -348,7 +441,7 @@ ipcMain.handle('report:export', async () => {
   }
 });
 
-ipcMain.handle('shell:show-item', (_e, filePath) => {
+handleFromApp('shell:show-item', (_e, filePath) => {
   if (filePath && fs.existsSync(filePath)) shell.showItemInFolder(filePath);
   return { ok: true };
 });

@@ -62,15 +62,17 @@ async function login(page, config, baseUrl, credentials, log = () => {}) {
     let frameDiag = '';
     try {
       frameDiag = '\n' + (await dumpFrames(page, { matchSelector: config.successSelector }));
-      log(frameDiag, 'warn');
     } catch (diagErr) {
       frameDiag = `\n(Khong lay duoc thong tin frame: ${diagErr.message})`;
     }
 
-    throw new Error(
-      `Dang nhap khong thanh cong (dang o ${currentUrl}). ` +
-      `Kiem tra lai User ID / mat khau hoac selector trong config.json.${frameDiag}`
+    // Thong bao cho nguoi dung phai ngan va noi dung viec ho can lam. Ban ke
+    // cau truc trang di rieng qua err.diagnostics (runner ghi ra file).
+    const err = new Error(
+      'Dang nhap khong thanh cong. Kiem tra lai User ID va mat khau.'
     );
+    err.diagnostics = `URL hien tai: ${currentUrl}${frameDiag}`;
+    throw err;
   }
 
   log('Dang nhap thanh cong.');

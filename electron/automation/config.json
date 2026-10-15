@@ -436,13 +436,14 @@
     "slowMo": 150,
     "timeoutMs": 15000,
     "maxRetryPerRow": 1,
-    "recordVideo": true,
+    "recordVideo": false,
     "videoSize": {
       "width": 1280,
       "height": 720
     },
     "debugSkipFinalSubmit": false,
-    "debugKeepBrowserOpen": false
+    "debugKeepBrowserOpen": false,
+    "keepMediaDays": 7
   },
   "labelColumn": "ho_ten_bmbh"
 }

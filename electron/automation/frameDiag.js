@@ -4,6 +4,45 @@
 // khong doc gia tri nguoi dung da nhap.
 
 const CLICKABLE_SELECTOR = 'button, a, input[type=button], input[type=submit], [role=button]';
+/**
+ * Rut gon thong bao loi cua he thong dich thanh MOT CAU nguoi dung hieu duoc.
+ *
+ * Alert cua he thong co dang nhieu dong lan ca tieng Trung va ten lop Java:
+ *
+ *   回傳碼Return Code:0
+ *   訊息說明Message:
+ *   1. com.cathay.common.exception.UCException
+ *   The agent doesn't have R03 certificate!
+ *   Dai ly chua co chung chi cua san pham: R03
+ *
+ * Nguoi nhap lieu chi can dong cuoi. Ham nay bo cac dong ky thuat va uu tien
+ * giu lai cau tieng Viet; neu khong co thi lay cau tieng Anh de hieu nhat.
+ */
+function rutGonThongBaoLoi(raw) {
+  const text = String(raw || '').trim();
+  if (!text) return 'Loi khong xac dinh';
+
+  const BO_QUA = [
+    /^\d+\.\s*[\w.]+Exception/i, // "1. com.cathay.common.exception.UCException"
+    /^[\w.]+Exception/i,
+    /return\s*code/i,
+    /^訊息說明/,
+    /^回傳碼/,
+    /^message\s*:?$/i,
+  ];
+
+  const dong = text
+    .split(/\r?\n/)
+    .map((d) => d.replace(/^\s*\d+\.\s*/, '').trim())
+    .filter((d) => d && !BO_QUA.some((re) => re.test(d)));
+
+  if (dong.length === 0) return text.split(/\r?\n/)[0].trim();
+
+  // Uu tien dong co dau tieng Viet
+  const tiengViet = dong.find((d) => /[àáâãèéêìíòóôõùúăđĩũơưăạảấầẩẫậắằẳẵặẹẻẽềềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỵỷỹ]/i.test(d));
+  return tiengViet || dong[dong.length - 1];
+}
+
 const INPUT_SELECTOR = 'input, select, textarea';
 
 /**
@@ -91,4 +130,4 @@ async function dumpFrames(page, { matchSelector } = {}) {
   return `Danh sach frame tren trang (${frames.length} frame):\n${info.join('\n')}`;
 }
 
-module.exports = { dumpFrames };
+module.exports = { dumpFrames, rutGonThongBaoLoi };
