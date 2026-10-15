@@ -1,6 +1,6 @@
 {
   "name": "insurance-illustration-app",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "App Electron: doc Excel va tu dong nhap bang minh hoa bao hiem bang Playwright",
   "type": "commonjs",
   "main": "electron/main.js",
